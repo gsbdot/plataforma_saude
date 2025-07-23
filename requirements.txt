@@ -1,0 +1,19 @@
+# Arquivo: requirements.txt
+
+# Core do Flask
+Flask==2.3.3
+python-dotenv==1.0.1
+
+# Banco de Dados e Migrações
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.25
+Flask-Migrate==4.0.5
+psycopg2-binary==2.9.9
+
+# Segurança
+Werkzeug==3.0.1  # Essencial para hashing de senhas
+Flask-Login==0.6.3 # Para gerenciar sessões de usuário
+
+# Filas e Tarefas Assíncronas (para fases futuras, mas já incluído)
+celery==5.3.6
+redis==5.0.3

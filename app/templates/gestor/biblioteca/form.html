@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h3>{{ titulo }}</h3>
+    <hr>
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="titulo" class="form-label">Título</label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" value="{{ conteudo.titulo if conteudo else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="conteudo_texto" class="form-label">Conteúdo (Texto)</label>
+                    <textarea class="form-control" id="conteudo_texto" name="conteudo_texto" rows="8" required>{{ conteudo.conteudo_texto if conteudo else '' }}</textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="url_video" class="form-label">URL do Vídeo (Opcional)</label>
+                        <input type="url" class="form-control" id="url_video" name="url_video" value="{{ conteudo.url_video if conteudo else '' }}" placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="url_imagem" class="form-label">URL da Imagem (Opcional)</label>
+                        <input type="url" class="form-control" id="url_imagem" name="url_imagem" value="{{ conteudo.url_imagem if conteudo else '' }}" placeholder="https://site.com/imagem.jpg">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="palavras_chave" class="form-label">Palavras-chave</label>
+                    <input type="text" class="form-control" id="palavras_chave" name="palavras_chave" value="{{ conteudo.palavras_chave if conteudo else '' }}">
+                    <div class="form-text">Separe as palavras por vírgula. Ex: febre,dor de cabeça,gripe</div>
+                </div>
+                <div class="text-end">
+                    <a href="{{ url_for('gestor.biblioteca_index') }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar Conteúdo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

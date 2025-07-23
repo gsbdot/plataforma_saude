@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Painel de Governança</h2>
+        <div>
+            <a href="{{ url_for('gestor.painel_uso') }}" class="btn btn-success">
+                <i class="bi bi-bar-chart-line-fill"></i> Painel de Uso
+            </a>
+            <a href="{{ url_for('gestor.biblioteca_index') }}" class="btn btn-dark">
+                <i class="bi bi-book-half"></i> Biblioteca
+            </a>
+            <a href="{{ url_for('gestor.agendar_consulta_form') }}" class="btn btn-success">
+                <i class="bi bi-calendar-plus"></i> Agendar Consulta
+            </a>
+            <a href="{{ url_for('gestor.editor_chatbot') }}" class="btn btn-info">
+                <i class="bi bi-robot"></i> Editor do Chatbot
+            </a>
+            <a href="{{ url_for('gestor.gerenciar_configuracoes') }}" class="btn btn-secondary">
+                <i class="bi bi-gear-fill"></i> Configurações
+            </a>
+            <a href="{{ url_for('gestor.criar_usuario') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Novo Usuário
+            </a>
+        </div>
+    </div>
+
+    <h4>Usuários do Sistema</h4>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome Completo</th>
+                <th>Email</th>
+                <th>Função (Role)</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{ usuario.nome_completo }}</td>
+                <td>{{ usuario.email }}</td>
+                <td><span class="badge bg-secondary">{{ usuario.role }}</span></td>
+                <td>
+                    {% if usuario.is_active %}
+                        <span class="badge bg-success">Ativo</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inativo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('gestor.editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    <form action="{{ url_for('gestor.toggle_active_usuario', id=usuario.id) }}" method="POST" class="d-inline">
+                        {% if usuario.is_active %}
+                            <button type="submit" class="btn btn-sm btn-danger">Desativar</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-sm btn-success">Ativar</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">Nenhum usuário encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

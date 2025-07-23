@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>Emissão de Documentos</h3>
+            <p class="text-muted">Paciente: <strong>{{ consulta.paciente.nome_completo }}</strong></p>
+        </div>
+        <a href="{{ url_for('gestor.dashboard') }}" class="btn btn-secondary">Voltar ao Cockpit</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5">
+            <h4>Novo Documento</h4>
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-journal-plus"></i> Criar Atestado Médico
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('gestor.criar_atestado', consulta_id=consulta.id) }}" method="POST">
+                        <div class="mb-3">
+                            <label for="dias_afastamento" class="form-label">Dias de Afastamento</label>
+                            <input type="number" class="form-control" id="dias_afastamento" name="dias_afastamento" required min="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="cid" class="form-label">CID (Opcional)</label>
+                            <input type="text" class="form-control" id="cid" name="cid" placeholder="Ex: A09">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Emitir Atestado</button>
+                    </form>
+                </div>
+                </div>
+        </div>
+
+        <div class="col-md-7">
+            <h4>Documentos Emitidos ({{ consulta.documentos|length }})</h4>
+            <div class="list-group">
+                {% for doc in consulta.documentos %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ doc.tipo.replace('_', ' ')|title }}</h5>
+                        <small>{{ doc.data_emissao.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </div>
+                    <p class="mb-1 small text-muted">{{ doc.conteudo }}</p>
+                    <button class="btn btn-sm btn-outline-primary mt-2">Visualizar/Imprimir</button>
+                </div>
+                {% else %}
+                <div class="list-group-item text-center">
+                    Nenhum documento emitido para esta consulta.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

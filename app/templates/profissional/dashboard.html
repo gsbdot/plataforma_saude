@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between">
+                    <h4><i class="bi bi-camera-video-fill"></i> Em Atendimento</h4>
+                    {% if em_atendimento %}
+                        <span class="badge bg-light text-dark fs-6">{{ em_atendimento.tipo.replace('_', ' ')|title }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if em_atendimento %}
+                        <h3 class="card-title">{{ em_atendimento.paciente.nome_completo }}</h3>
+                        <p class="card-text"><small class="text-muted">Início: {{ em_atendimento.data_inicio.strftime('%H:%M') }}</small></p>
+                        <hr>
+                        
+                        <form action="{{ url_for('gestor.finalizar_atendimento', consulta_id=em_atendimento.id) }}" method="POST" class="mb-3">
+                            <div class="mb-3">
+                                <label for="resumo_atendimento" class="form-label"><strong>Resumo / Anotações Finais</strong></label>
+                                <textarea class="form-control" name="resumo_atendimento" rows="3" placeholder="Descreva o atendimento..."></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <a href="{{ url_for('gestor.pagina_documentos', consulta_id=em_atendimento.id) }}" class="btn btn-success me-2">Emitir Documento</a>
+                                <button type="submit" class="btn btn-danger">Finalizar Atendimento</button>
+                            </div>
+                        </form>
+
+                        {% if em_atendimento.tipo == 'ACOLHIMENTO_ENF' %}
+                        <hr>
+                        <form action="{{ url_for('gestor.transferir_para_medico', consulta_id=em_atendimento.id) }}" method="POST">
+                            <label for="motivo_transferencia" class="form-label"><strong>Transferir para Fila Médica</strong></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="motivo_transferencia" placeholder="Motivo da transferência (opcional)">
+                                <button type="submit" class="btn btn-warning">Transferir</button>
+                            </div>
+                        </form>
+                        {% endif %}
+
+                    {% else %}
+                        <p class="text-center text-muted">Nenhum paciente em atendimento.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><i class="bi bi-shield-plus"></i> Fila Acolhimento ({{ fila_acolhimento|length }})</h4>
+                    <div class="list-group">
+                        {% for paciente in fila_acolhimento %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ paciente.nome_completo }}</h5>
+                                <form action="{{ url_for('gestor.iniciar_atendimento', paciente_id=paciente.id, tipo_atendimento='ACOLHIMENTO_ENF') }}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-primary">Chamar</button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="list-group-item text-center text-muted">Fila vazia.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h4><i class="bi bi-heart-pulse"></i> Fila Médica ({{ fila_medica|length }})</h4>
+                    <div class="list-group">
+                        {% for paciente in fila_medica %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ paciente.nome_completo }}</h5>
+                                <form action="{{ url_for('gestor.iniciar_atendimento', paciente_id=paciente.id, tipo_atendimento='CONSULTA_MEDICA') }}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-danger">Chamar</button>
+                                </form>
+                            </div>
+                        {% else %}
+                             <div class="list-group-item text-center text-muted">Fila vazia.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-calendar-check"></i> Agenda do Dia</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for consulta in agenda_do_dia %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ consulta.data_inicio.strftime('%H:%M') }}</strong> - {{ consulta.paciente.nome_completo }}
+                            </div>
+                            <form action="{{ url_for('gestor.iniciar_atendimento_agendado', consulta_id=consulta.id) }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-success">Iniciar</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item text-center text-muted">Nenhuma consulta agendada para hoje.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-clock-history"></i> Atendimentos do Dia</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for consulta in atendimentos_dia %}
+                        <li class="list-group-item">
+                            <strong>{{ consulta.paciente.nome_completo }}</strong>
+                            <small class="d-block text-muted">{{ consulta.resumo_atendimento or 'Consulta de rotina' }}</small>
+                            <small class="text-muted">Finalizado às {{ consulta.data_fim.strftime('%H:%M') }}</small>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item text-center text-muted">Nenhum atendimento finalizado hoje.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-check2-square"></i> Minhas Tarefas Atribuídas</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('gestor.criar_tarefa') }}" method="POST" class="d-flex mb-3">
+                        <input type="text" name="titulo_tarefa" class="form-control me-2" placeholder="Adicionar tarefa para mim..." required>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i></button>
+                    </form>
+
+                    <ul class="list-group mb-3">
+                        {% for tarefa in tarefas_pendentes %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    {{ tarefa.titulo }}
+                                    <small class="d-block text-muted">Criado por: {{ tarefa.criado_por.nome_completo }}</small>
+                                </div>
+                                <form action="{{ url_for('gestor.concluir_tarefa', tarefa_id=tarefa.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Marcar como concluída">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item text-center text-muted">Nenhuma tarefa pendente.</li>
+                        {% endfor %}
+                    </ul>
+                    <hr>
+
+                    <h6><i class="bi bi-send"></i> Delegar Nova Tarefa</h6>
+                    <form action="{{ url_for('gestor.delegar_tarefa') }}" method="POST">
+                        <div class="mb-2">
+                            <label for="titulo_delegado" class="form-label small">Descrição da Tarefa</label>
+                            <input type="text" id="titulo_delegado" name="titulo_delegado" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="atribuido_para_id" class="form-label small">Atribuir Para</label>
+                            <select name="atribuido_para_id" id="atribuido_para_id" class="form-select" required>
+                                <option value="" disabled selected>Selecione um profissional...</option>
+                                {% for prof in outros_profissionais %}
+                                    <option value="{{ prof.id }}">{{ prof.nome_completo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Delegar Tarefa</button>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

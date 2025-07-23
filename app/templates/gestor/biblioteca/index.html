@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3><i class="bi bi-book-half"></i> Biblioteca de Cuidados Rápidos</h3>
+        <div>
+            <a href="{{ url_for('gestor.dashboard') }}" class="btn btn-secondary">Voltar</a>
+            <a href="{{ url_for('gestor.biblioteca_novo') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Adicionar Conteúdo
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Título</th>
+                        <th>Palavras-chave</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in conteudos %}
+                    <tr>
+                        <td>{{ item.titulo }}</td>
+                        <td>
+                            {% for palavra in item.palavras_chave.split(',') %}
+                                <span class="badge bg-secondary">{{ palavra.strip() }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('gestor.biblioteca_editar', id=item.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                            <form action="{{ url_for('gestor.biblioteca_apagar', id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja apagar este conteúdo?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Apagar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">Nenhum conteúdo na biblioteca ainda.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

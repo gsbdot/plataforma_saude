@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3><i class="bi bi-bar-chart-line-fill"></i> Painel de Uso e Faturamento</h3>
+        <a href="{{ url_for('gestor.dashboard') }}" class="btn btn-secondary">Voltar ao Dashboard</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Resumo de Consumo para o Mês de {{ mes_atual|title }}
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card text-center text-bg-primary mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Consultas Totais</h5>
+                            <p class="display-4">{{ resumo.get('TOTAL_CONSULTAS', 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center text-bg-secondary mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Documentos Emitidos</h5>
+                            <p class="display-4">{{ resumo.get('DOCUMENTO_EMITIDO', 0) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center text-bg-light mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Outros Eventos</h5>
+                            <p class="display-4">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <h5 class="mt-4">Detalhes</h5>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Consultas de Urgência Iniciadas
+                    <span class="badge bg-primary rounded-pill">{{ resumo.get('CONSULTA_INICIADA', 0) }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Consultas Agendadas Iniciadas
+                    <span class="badge bg-primary rounded-pill">{{ resumo.get('CONSULTA_AGENDADA_INICIADA', 0) }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Total de Documentos Emitidos (Atestados)
+                    <span class="badge bg-secondary rounded-pill">{{ resumo.get('DOCUMENTO_EMITIDO', 0) }}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="card-footer text-muted">
+            Este é um painel simplificado. Relatórios detalhados e filtros por período serão adicionados no futuro.
+        </div>
+    </div>
+</div>
+{% endblock %}
