@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3><i class="bi bi-cloud-upload-fill"></i> Importar Base de Pacientes via CSV</h3>
+        <a href="{{ url_for('gestor.dashboard') }}" class="btn btn-secondary">Voltar ao Dashboard</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    Selecione o arquivo CSV
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">Arquivo CSV</label>
+                            <input class="form-control" type="file" name="csv_file" id="csv_file" accept=".csv" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Enviar e Processar Arquivo</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="alert alert-info">
+                <h5><i class="bi bi-info-circle-fill"></i> Instruções</h5>
+                <p>O arquivo CSV deve seguir um formato específico para ser importado corretamente:</p>
+                <ul>
+                    <li>Deve conter um cabeçalho na primeira linha.</li>
+                    <li>As colunas obrigatórias são: <strong>nome_completo, cpf, telefone_whatsapp</strong>.</li>
+                    <li>A coluna opcional é: <strong>cns</strong>.</li>
+                    <li>O separador de colunas deve ser a vírgula (`,`).</li>
+                </ul>
+                <p><strong>Exemplo:</strong></p>
+                <pre class="bg-light p-2 rounded"><code>nome_completo,cpf,cns,telefone_whatsapp
+Joaquim da Silva,11122233344,123456789012345,+5511987654321
+Maria Oliveira,55566677788,,+5521912345678</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

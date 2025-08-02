@@ -1,28 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
         <h2>Painel de Governança</h2>
-        <div>
-            <a href="{{ url_for('gestor.painel_uso') }}" class="btn btn-success">
-                <i class="bi bi-bar-chart-line-fill"></i> Painel de Uso
-            </a>
-            <a href="{{ url_for('gestor.biblioteca_index') }}" class="btn btn-dark">
-                <i class="bi bi-book-half"></i> Biblioteca
-            </a>
-            <a href="{{ url_for('gestor.agendar_consulta_form') }}" class="btn btn-success">
-                <i class="bi bi-calendar-plus"></i> Agendar Consulta
-            </a>
-            <a href="{{ url_for('gestor.editor_chatbot') }}" class="btn btn-info">
-                <i class="bi bi-robot"></i> Editor do Chatbot
-            </a>
-            <a href="{{ url_for('gestor.gerenciar_configuracoes') }}" class="btn btn-secondary">
-                <i class="bi bi-gear-fill"></i> Configurações
-            </a>
-            <a href="{{ url_for('gestor.criar_usuario') }}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Novo Usuário
-            </a>
+        {% if status_operacional %}
+        <div class="alert {% if status_operacional.aberto %}alert-success{% else %}alert-danger{% endif %} py-2">
+            <strong>Status do Serviço:</strong> {{ status_operacional.mensagem }}
         </div>
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-end align-items-center mb-4 flex-wrap">
+        <a href="{{ url_for('gestor.importar_pacientes_form') }}" class="btn btn-info me-2 mb-2">
+            <i class="bi bi-cloud-upload-fill"></i> Importar Pacientes
+        </a>
+        <a href="{{ url_for('gestor.relatorio_esus') }}" class="btn btn-primary me-2 mb-2">
+            <i class="bi bi-file-earmark-text-fill"></i> Relatório e-SUS
+        </a>
+        <a href="{{ url_for('gestor.solicitacoes_correcao') }}" class="btn btn-warning me-2 mb-2">
+            <i class="bi bi-pencil-square"></i> Solicitações de Correção
+        </a>
+        <a href="{{ url_for('gestor.painel_uso') }}" class="btn btn-success me-2 mb-2">
+            <i class="bi bi-bar-chart-line-fill"></i> Painel de Uso
+        </a>
+        <a href="{{ url_for('gestor.biblioteca_index') }}" class="btn btn-dark me-2 mb-2">
+            <i class="bi bi-book-half"></i> Biblioteca
+        </a>
+        <a href="{{ url_for('gestor.agendar_consulta_form') }}" class="btn btn-success me-2 mb-2">
+            <i class="bi bi-calendar-plus"></i> Agendar Consulta
+        </a>
+        <a href="{{ url_for('gestor.editor_chatbot') }}" class="btn btn-info me-2 mb-2">
+            <i class="bi bi-robot"></i> Editor do Chatbot
+        </a>
+        <a href="{{ url_for('gestor.gerenciar_configuracoes') }}" class="btn btn-secondary me-2 mb-2">
+            <i class="bi bi-gear-fill"></i> Configurações
+        </a>
+        <a href="{{ url_for('gestor.criar_usuario') }}" class="btn btn-primary mb-2">
+            <i class="bi bi-plus-lg"></i> Novo Usuário
+        </a>
     </div>
 
     <h4>Usuários do Sistema</h4>

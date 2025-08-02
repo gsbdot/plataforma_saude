@@ -10,6 +10,13 @@
             <div class="card-body">
                 <form method="POST" action="{{ url_for('auth.login') }}">
                     <div class="mb-3">
+                        <label for="subdominio" class="form-label">Identificador da Prefeitura</label>
+                        <input type="text" class="form-control" id="subdominio" name="subdominio" placeholder="ex: saopaulo" required>
+                        <div class="form-text">
+                            É o identificador único do seu município no sistema.
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="email" name="email" required>
                     </div>

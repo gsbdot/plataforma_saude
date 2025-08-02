@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Acessar Portal do Paciente</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Para acessar seus dados de saúde, informe o identificador da sua prefeitura e seu CPF.
+                    Você receberá um link de acesso seguro e temporário.
+                </p>
+                <hr>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="subdominio" class="form-label">Identificador da Prefeitura</label>
+                        <input type="text" class="form-control" id="subdominio" name="subdominio" placeholder="ex: saopaulo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cpf" class="form-label">Seu CPF (apenas números)</label>
+                        <input type="text" class="form-control" id="cpf" name="cpf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Solicitar Link de Acesso</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

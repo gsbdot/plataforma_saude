@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3><i class="bi bi-pencil-square"></i> Solicitações de Correção de Dados (LGPD)</h3>
+        <a href="{{ url_for('gestor.dashboard') }}" class="btn btn-secondary">Voltar ao Dashboard</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Solicitações Pendentes de Análise
+        </div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Paciente</th>
+                        <th>Campo a Corrigir</th>
+                        <th>Justificativa do Paciente</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitacao in solicitacoes %}
+                    <tr>
+                        <td>{{ solicitacao.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ solicitacao.paciente.nome_completo }}</td>
+                        <td><span class="badge bg-warning">{{ solicitacao.campo }}</span></td>
+                        <td>{{ solicitacao.justificativa }}</td>
+                        <td class="text-center">
+                            <form action="{{ url_for('gestor.aprovar_correcao', solicitacao_id=solicitacao.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja aprovar esta correção? A alteração no cadastro do paciente será irreversível.');">
+                                <button type="submit" class="btn btn-sm btn-success">Aprovar</button>
+                            </form>
+                            
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejeitarModal-{{ solicitacao.id }}">
+                                Rejeitar
+                            </button>
+
+                            <div class="modal fade" id="rejeitarModal-{{ solicitacao.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Rejeitar Solicitação</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{{ url_for('gestor.rejeitar_correcao', solicitacao_id=solicitacao.id) }}" method="POST">
+                                            <div class="modal-body text-start">
+                                                <p>Por favor, informe o motivo da rejeição para o paciente <strong>{{ solicitacao.paciente.nome_completo }}</strong>.</p>
+                                                <div class="mb-3">
+                                                    <label for="resposta_gestor" class="form-label">Motivo</label>
+                                                    <textarea class="form-control" name="resposta_gestor" required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-danger">Confirmar Rejeição</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Nenhuma solicitação pendente no momento.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

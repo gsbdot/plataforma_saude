@@ -17,3 +17,4 @@ Flask-Login==0.6.3 # Para gerenciar sessões de usuário
 # Filas e Tarefas Assíncronas (para fases futuras, mas já incluído)
 celery==5.3.6
 redis==5.0.3
+pytz==2024.1

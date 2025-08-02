@@ -1,36 +1,165 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
+<style>
+    .editor-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .flow-node { border: 1px solid #ddd; border-left: 5px solid #0d6efd; margin-bottom: 1rem; }
+    .flow-node .card-header { font-weight: bold; }
+    .chat-simulator { height: 500px; display: flex; flex-direction: column; }
+    .chat-messages { flex-grow: 1; overflow-y: auto; padding: 1rem; border: 1px solid #eee; }
+    .chat-bubble { max-width: 80%; padding: 0.5rem 1rem; margin-bottom: 0.5rem; border-radius: 15px; }
+    .bubble-bot { background-color: #f1f1f1; align-self: flex-start; }
+    .bubble-user { background-color: #dcf8c6; align-self: flex-end; }
+    .chat-options { padding: 1rem; border-top: 1px solid #eee; }
+</style>
+
+<div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3><i class="bi bi-robot"></i> Editor de Mensagens do Chatbot</h3>
+        <h3><i class="bi bi-robot"></i> Editor de Fluxo do Chatbot</h3>
         <a href="{{ url_for('gestor.dashboard') }}" class="btn btn-secondary">Voltar ao Dashboard</a>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            Edite os textos que os cidadãos receberão pelo WhatsApp
-        </div>
-        <div class="card-body">
-            <p class="text-muted">
-                Você pode usar "variáveis" como <code>{tempo_espera}</code>, <code>{horario_inicio}</code>, etc., em certas mensagens. O sistema as substituirá pelos valores corretos automaticamente.
-            </p>
-            <hr>
-            <form method="POST">
-                {% for msg in mensagens %}
-                    <div class="mb-4">
-                        <label for="{{ msg.chave }}" class="form-label">
-                            <strong>{{ msg.chave }}</strong>
-                        </label>
-                        <p class="small text-muted mb-1">{{ msg.descricao }}</p>
-                        <textarea class="form-control" id="{{ msg.chave }}" name="{{ msg.chave }}" rows="3">{{ msg.texto }}</textarea>
+    <form method="POST">
+        <input type="hidden" name="flow_definition" id="flow-definition-input" value="{{ flow_data | tojson | safe }}">
+
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="text-muted">Edite o texto e as opções de cada etapa do fluxo. Use o simulador para testar suas alterações antes de salvar.</p>
+                    <div>
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#testModal">
+                            <i class="bi bi-play-circle-fill"></i> Testar Fluxo
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save-fill"></i> Salvar Alterações
+                        </button>
                     </div>
-                {% endfor %}
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-primary">Salvar Todas as Alterações</button>
                 </div>
-            </form>
+                <hr>
+
+                <div id="flow-editor">
+                    </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="testModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Simulador de Chat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="chat-simulator">
+                    <div class="chat-messages d-flex flex-column" id="chat-messages">
+                        </div>
+                    <div class="chat-options" id="chat-options">
+                        </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const flowEditor = document.getElementById('flow-editor');
+        const flowInput = document.getElementById('flow-definition-input');
+        
+        let flowData = {{ flow_data | tojson | safe }};
+        const messagesData = {{ mensagens | tojson | safe }};
+
+        function renderFlow() {
+            flowEditor.innerHTML = '';
+            for (const nodeId in flowData.nodes) {
+                const node = flowData.nodes[nodeId];
+                const message = messagesData[node.message_key] || { texto: 'Mensagem não encontrada' };
+                
+                let optionsHtml = '';
+                if (node.type === 'options') {
+                    optionsHtml = '<hr><p class="small mb-1"><strong>Opções do Cidadão:</strong></p>';
+                    node.options.forEach((opt, index) => {
+                        optionsHtml += `
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text">${index + 1}.</span>
+                                <input type="text" class="form-control" value="${opt.label}" onchange="updateOptionLabel('${nodeId}', ${index}, this.value)" placeholder="Texto do botão">
+                                <span class="input-group-text">leva para</span>
+                                <select class="form-select" onchange="updateOptionNextNode('${nodeId}', ${index}, this.value)">
+                                    ${Object.keys(flowData.nodes).map(key => `<option value="${key}" ${opt.next_node === key ? 'selected' : ''}>${key}</option>`).join('')}
+                                </select>
+                            </div>
+                        `;
+                    });
+                }
+                
+                const blockHtml = `
+                    <div class="card flow-node">
+                        <div class="card-header">${nodeId.replace('_', ' ')}</div>
+                        <div class="card-body">
+                            <label class="form-label small"><strong>Texto da Mensagem:</strong></label>
+                            <textarea class="form-control" name="text_${node.message_key}" rows="3">${message.texto}</textarea>
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+                flowEditor.innerHTML += blockHtml;
+            }
+        }
+
+        // Funções para atualizar os dados do fluxo em memória
+        window.updateOptionLabel = function(nodeId, optionIndex, newLabel) {
+            flowData.nodes[nodeId].options[optionIndex].label = newLabel;
+            flowInput.value = JSON.stringify(flowData, null, 4);
+        };
+        
+        window.updateOptionNextNode = function(nodeId, optionIndex, newNextNode) {
+            flowData.nodes[nodeId].options[optionIndex].next_node = newNextNode;
+            flowInput.value = JSON.stringify(flowData, null, 4);
+        };
+
+        // Lógica do Simulador
+        const chatMessages = document.getElementById('chat-messages');
+        const chatOptions = document.getElementById('chat-options');
+        let currentNodeId = flowData.start_node;
+
+        function startChat() {
+            chatMessages.innerHTML = '';
+            chatOptions.innerHTML = '';
+            currentNodeId = flowData.start_node;
+            showNode(currentNodeId);
+        }
+
+        function showNode(nodeId) {
+            const node = flowData.nodes[nodeId];
+            const messageText = document.querySelector(`[name="text_${node.message_key}"]`).value;
+            
+            // Exibe a mensagem do bot
+            chatMessages.innerHTML += `<div class="chat-bubble bubble-bot">${messageText}</div>`;
+
+            // Limpa as opções e exibe as novas, se houver
+            chatOptions.innerHTML = '';
+            if (node.type === 'options') {
+                node.options.forEach(opt => {
+                    chatOptions.innerHTML += `<button class="btn btn-outline-primary btn-sm me-2" onclick="userSelectOption('${opt.next_node}', '${opt.label}')">${opt.label}</button>`;
+                });
+            } else if (node.next_node) {
+                setTimeout(() => showNode(node.next_node), 1000); // Avança automaticamente
+            }
+        }
+
+        window.userSelectOption = function(nextNodeId, label) {
+            chatMessages.innerHTML += `<div class="chat-bubble bubble-user">${label}</div>`;
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Rola para baixo
+            currentNodeId = nextNodeId;
+            showNode(currentNodeId);
+        };
+
+        // Inicia o simulador quando o modal é aberto
+        document.getElementById('testModal').addEventListener('show.bs.modal', startChat);
+        
+        renderFlow();
+    });
+</script>
 {% endblock %}

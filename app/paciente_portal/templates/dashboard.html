@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3>Portal do Paciente</h3>
+        <p class="lead mb-0">Bem-vindo(a), <strong>{{ paciente.nome_completo }}</strong>!</p>
+    </div>
+    <a href="{{ url_for('.logout') }}" class="btn btn-secondary">Sair do Portal</a>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>Seus Dados Cadastrais</strong>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Nome:</strong> {{ paciente.nome_completo }}</li>
+                <li class="list-group-item"><strong>CPF:</strong> {{ paciente.cpf }}</li>
+                <li class="list-group-item"><strong>CNS:</strong> {{ paciente.cns or 'Não informado' }}</li>
+                <li class="list-group-item"><strong>Telefone:</strong> {{ paciente.telefone_whatsapp }}</li>
+            </ul>
+            <div class="card-body">
+                <h6 class="card-title mt-2">Solicitar Correção de Dados</h6>
+                <p class="small text-muted">Percebeu algum erro? Selecione o campo e descreva a correção necessária.</p>
+                <form action="{{ url_for('.solicitar_correcao') }}" method="POST">
+                    <div class="mb-2">
+                        <label for="campo" class="form-label small">Qual informação está incorreta?</label>
+                        <select name="campo" id="campo" class="form-select" required>
+                            <option value="nome_completo">Nome Completo</option>
+                            <option value="cns">CNS</option>
+                            <option value="telefone_whatsapp">Telefone</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="justificativa" class="form-label small">Descreva a correção</label>
+                        <textarea name="justificativa" id="justificativa" class="form-control" rows="2" placeholder="Ex: Meu sobrenome está escrito errado, o correto é..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">Enviar Solicitação</button>
+                </form>
+                </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <strong>Log de Acesso ao seu Prontuário</strong>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for log in logs_acesso %}
+                    <li class="list-group-item">
+                        <small>
+                            <strong>{{ log.usuario.nome_completo }}</strong> acessou em 
+                            {{ log.timestamp.strftime('%d/%m/%Y às %H:%M') }}.
+                            <span class="d-block">Motivo: <span class="badge bg-info">{{ log.acao.replace('_', ' ')|title }}</span></span>
+                        </small>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted">Nenhum acesso registrado.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <h4>Seu Histórico de Atendimentos (Prontuário)</h4>
+        {% for consulta in consultas %}
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>{{ consulta.tipo.replace('_', ' ')|title }}</strong>
+                    <small>{{ consulta.data_inicio.strftime('%d/%m/%Y') }}</small>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>Profissional:</strong> {{ consulta.profissional.nome_completo }}<br>
+                        <strong>Resumo:</strong> {{ consulta.resumo_atendimento or 'Nenhum resumo informado.' }}
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center text-muted">
+                    Você ainda não possui atendimentos registrados na plataforma.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

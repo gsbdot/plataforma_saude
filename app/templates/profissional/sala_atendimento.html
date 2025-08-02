@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3><i class="bi bi-camera-video-fill"></i> Sala de Atendimento</h3>
+        <a href="{{ url_for('gestor.dashboard') }}" class="btn btn-secondary">Voltar ao Painel</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <span>Paciente: <strong>{{ consulta.paciente.nome_completo }}</strong></span>
+                    <span>Início: {{ consulta.data_inicio.strftime('%H:%M') }}</span>
+                </div>
+                <div class="card-body bg-dark text-white text-center" style="height: 500px; display: flex; align-items: center; justify-content: center;">
+                    
+                    <div>
+                        <i class="bi bi-camera-video-off" style="font-size: 4rem;"></i>
+                        <p class="lead mt-3">Simulação de Vídeo</p>
+                        <p class="small">URL da Sala (simulada): <br><code>{{ dados_sala.url_sala }}</code></p>
+                    </div>
+
+                </div>
+                <div class="card-footer text-center">
+                    <button class="btn btn-secondary"><i class="bi bi-mic-mute-fill"></i> Mudo</button>
+                    <button class="btn btn-secondary"><i class="bi bi-camera-video-off-fill"></i> Parar Vídeo</button>
+                    <button class="btn btn-info"><i class="bi bi-file-earmark-plus"></i> Abrir Prontuário</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Ações do Atendimento</strong>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('gestor.finalizar_atendimento', consulta_id=consulta.id) }}" method="POST" class="mb-3">
+                        <div class="mb-3">
+                            <label for="resumo_atendimento" class="form-label"><strong>Resumo / Anotações Finais</strong></label>
+                            <textarea class="form-control" name="resumo_atendimento" rows="5" placeholder="Descreva o atendimento..." required></textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('gestor.pagina_documentos', consulta_id=consulta.id) }}" class="btn btn-success">Emitir Documento</a>
+                            <button type="submit" class="btn btn-danger">Finalizar e Encerrar Atendimento</button>
+                        </div>
+                    </form>
+
+                    {% if consulta.tipo == 'ACOLHIMENTO_ENF' %}
+                    <hr>
+                    <form action="{{ url_for('gestor.transferir_para_medico', consulta_id=consulta.id) }}" method="POST">
+                        <label for="motivo_transferencia" class="form-label"><strong>Transferir para Fila Médica</strong></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="motivo_transferencia" placeholder="Motivo da transferência (opcional)">
+                            <button type="submit" class="btn btn-warning">Transferir</button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
